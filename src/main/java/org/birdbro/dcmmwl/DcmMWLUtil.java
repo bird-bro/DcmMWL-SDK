@@ -34,10 +34,10 @@ public class DcmMWLUtil {
          * RemoteAEPort: SCP的端口  not null
          * LocalCalling: 本机AE     not null
          * LocalAEHostL: 本机IP     not null
+         *
          * Date:检查日期 默认Null
-         * Device: 设备 默认Null
          * Mod:检查模态  默认Null
-         * ConnectTO: 连接超时时间
+
          * */
         dcmMWLDto.setRemoteCalled("DEMO");
         dcmMWLDto.setRemoteAEHost("127.0.0.1");
@@ -46,9 +46,9 @@ public class DcmMWLUtil {
         dcmMWLDto.setLocalCalling("test");
         dcmMWLDto.setLocalAEHost("127.0.0.1");
         dcmMWLDto.setMod("CT");
-        dcmMWLDto.setConnectTO("10000");
-        //dcmMWLDto.setDate("20140108");
-        //dcmMWLDto.setDevice("DEMO");
+
+        dcmMWLDto.setDate("19960406");
+        //dcmMWLDto.setTime("160700");
 
         try {
             //原始dicom标签数据返回
