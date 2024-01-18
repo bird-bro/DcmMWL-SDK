@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 public class WorkListDto implements Serializable {
 
+    private String charSet;
     /*
     0008,0050
      */

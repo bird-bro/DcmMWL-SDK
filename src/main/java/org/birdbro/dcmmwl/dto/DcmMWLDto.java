@@ -135,5 +135,8 @@ public class DcmMWLDto {
     /*@ApiModelProperty(value = "truststorepw")*/
     private String truststorepw;
 
+ /*@ApiModelProperty(value = "character")*/
+ private String charSet;
+
 
 }

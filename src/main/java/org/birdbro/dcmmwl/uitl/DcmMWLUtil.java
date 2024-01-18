@@ -4,10 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import org.birdbro.dcmmwl.dto.DcmMWLDto;
 import org.birdbro.dcmmwl.dto.WorkListDto;
 import lombok.extern.slf4j.Slf4j;
-import org.dcm4che2.data.BasicDicomObject;
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
-import org.dcm4che2.data.UID;
+import org.dcm4che2.data.*;
 import org.dcm4che2.net.*;
 
 import java.io.FileInputStream;
@@ -52,6 +49,7 @@ public class DcmMWLUtil {
     private static char[] SECRET = {'s', 'e', 'c', 'r', 'e', 't'};
 
     private static final int[] RETURN_KEYS = {
+            Tag.SpecificCharacterSet,
             Tag.AccessionNumber,
             Tag.ReferringPhysicianName,
             Tag.PatientName,
@@ -126,6 +124,7 @@ public class DcmMWLUtil {
 
     private char[] trustStorePassword = SECRET;
 
+
     public DcmMWLUtil(String name) {
         device = new Device(name);
         executor = new NewThreadExecutor(name);
@@ -138,9 +137,12 @@ public class DcmMWLUtil {
         ae.setNetworkConnection(conn);
         ae.setAssociationInitiator(true);
         ae.setAETitle(name);
+
         for (int i = 0; i < RETURN_KEYS.length; i++) {
             keys.putNull(RETURN_KEYS[i], null);
         }
+
+
         keys.putNestedDicomObject(Tag.RequestedProcedureCodeSequence,
                 new BasicDicomObject());
         keys.putNestedDicomObject(Tag.ScheduledProcedureStepSequence, spsKeys);
@@ -151,6 +153,9 @@ public class DcmMWLUtil {
                 new BasicDicomObject());
     }
 
+    public final void setSpecificCharacterSet(String charSet) {
+        keys.putString(Tag.SpecificCharacterSet, VR.CS, charSet);
+    }
     public final void setLocalHost(String hostname) {
         conn.setHostname(hostname);
     }
@@ -273,6 +278,7 @@ public class DcmMWLUtil {
     public final void setCancelAfter(int limit) {
         this.cancelAfter = limit;
     }
+
 
     public void addMatchingKey(int[] tagPath, String value) {
         keys.putString(tagPath, null, value);
@@ -411,6 +417,9 @@ public class DcmMWLUtil {
             dcmmwl.addSpsMatchingKey(Tag.ScheduledStationAETitle,
                     dcmMWLDto.getAet());
         }
+        if (StrUtil.isNotBlank(dcmMWLDto.getCharSet())) {
+            dcmmwl.setSpecificCharacterSet(dcmMWLDto.getCharSet());
+        }
 
 
 
@@ -451,6 +460,7 @@ public class DcmMWLUtil {
             }
             if (StrUtil.isNotBlank(dcmMWLDto.getKeypw())) {
                 dcmmwl.setKeyPassword(dcmMWLDto.getKeypw());
+
             }
             if (StrUtil.isNotBlank(dcmMWLDto.getTruststore())) {
                 dcmmwl.setTrustStoreURL(dcmMWLDto.getTruststore());
@@ -506,229 +516,7 @@ public class DcmMWLUtil {
         log.info("Released connection to " + dcmMWLDto.getRemoteCalled());
         return dicomObjectList;
     }
-//
-//    private static CommandLine parse(String[] args) {
-//        Options opts = new Options();
-//
-//        OptionBuilder.withArgName("name");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "set device name, use DCMMWL by default");
-//        opts.addOption(OptionBuilder.create("device"));
-//
-//        OptionBuilder.withArgName("aet[@host]");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("set AET and local address of local " +
-//                "Application Entity, use device name and pick up any valid " +
-//                "local address to bind the socket by default");
-//        opts.addOption(OptionBuilder.create("L"));
-//
-//        OptionBuilder.withArgName("username");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "enable User Identity Negotiation with specified username and "
-//                        + " optional passcode");
-//        opts.addOption(OptionBuilder.create("username"));
-//
-//        OptionBuilder.withArgName("passcode");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "optional passcode for User Identity Negotiation, "
-//                        + "only effective with option -username");
-//        opts.addOption(OptionBuilder.create("passcode"));
-//
-//        opts.addOption("uidnegrsp", false,
-//                "request positive User Identity Negotation response, "
-//                        + "only effective with option -username");
-//
-//        OptionBuilder.withArgName("NULL|3DES|AES");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "enable TLS connection without, 3DES or AES encryption");
-//        opts.addOption(OptionBuilder.create("tls"));
-//
-//        OptionGroup tlsProtocol = new OptionGroup();
-//        tlsProtocol.addOption(new Option("tls1",
-//                "disable the use of SSLv3 and SSLv2 for TLS connections"));
-//        tlsProtocol.addOption(new Option("ssl3",
-//                "disable the use of TLSv1 and SSLv2 for TLS connections"));
-//        tlsProtocol.addOption(new Option("no_tls1",
-//                "disable the use of TLSv1 for TLS connections"));
-//        tlsProtocol.addOption(new Option("no_ssl3",
-//                "disable the use of SSLv3 for TLS connections"));
-//        tlsProtocol.addOption(new Option("no_ssl2",
-//                "disable the use of SSLv2 for TLS connections"));
-//        opts.addOptionGroup(tlsProtocol);
-//
-//        opts.addOption("noclientauth", false,
-//                "disable client authentification for TLS");
-//
-//        OptionBuilder.withArgName("file|url");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "file path or URL of P12 or JKS keystore, resource:tls/test_sys_1.p12 by default");
-//        opts.addOption(OptionBuilder.create("keystore"));
-//
-//        OptionBuilder.withArgName("password");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "password for keystore file, 'secret' by default");
-//        opts.addOption(OptionBuilder.create("keystorepw"));
-//
-//        OptionBuilder.withArgName("password");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "password for accessing the key in the keystore, keystore password by default");
-//        opts.addOption(OptionBuilder.create("keypw"));
-//
-//        OptionBuilder.withArgName("file|url");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "file path or URL of JKS truststore, resource:tls/mesa_certs.jks by default");
-//        opts.addOption(OptionBuilder.create("truststore"));
-//
-//        OptionBuilder.withArgName("password");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription(
-//                "password for truststore file, 'secret' by default");
-//        opts.addOption(OptionBuilder.create("truststorepw"));
-//
-//        opts.addOption("ivrle", false,
-//                "offer only Implicit VR Little Endian Transfer Syntax.");
-//        opts.addOption("fuzzy", false,
-//                "negotiate support of fuzzy semantic person name attribute matching.");
-//        opts.addOption("pdv1", false,
-//                "send only one PDV in one P-Data-TF PDU, pack command and data " +
-//                        "PDV in one P-DATA-TF PDU by default.");
-//        opts.addOption("tcpdelay", false,
-//                "set TCP_NODELAY socket option to false, true by default");
-//
-//        OptionBuilder.withArgName("ms");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("timeout in ms for TCP connect, no timeout by default");
-//        opts.addOption(OptionBuilder.create("connectTO"));
-//
-//        OptionBuilder.withArgName("ms");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("delay in ms for Socket close after sending A-ABORT, 50ms by default");
-//        opts.addOption(OptionBuilder.create("soclosedelay"));
-//
-//        OptionBuilder.withArgName("ms");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("period in ms to check for outstanding DIMSE-RSP, 10s by default");
-//        opts.addOption(OptionBuilder.create("reaper"));
-//
-//        OptionBuilder.withArgName("ms");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("timeout in ms for receiving DIMSE-RSP, 10s by default");
-//        opts.addOption(OptionBuilder.create("rspTO"));
-//
-//        OptionBuilder.withArgName("ms");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("timeout in ms for receiving A-ASSOCIATE-AC, 5s by default");
-//        opts.addOption(OptionBuilder.create("acceptTO"));
-//
-//        OptionBuilder.withArgName("ms");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("timeout in ms for receiving A-RELEASE-RP, 5s by default");
-//        opts.addOption(OptionBuilder.create("releaseTO"));
-//
-//        OptionBuilder.withArgName("KB");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("maximal length in KB of received P-DATA-TF PDUs, 16KB by default");
-//        opts.addOption(OptionBuilder.create("rcvpdulen"));
-//
-//        OptionBuilder.withArgName("KB");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("maximal length in KB of sent P-DATA-TF PDUs, 16KB by default");
-//        opts.addOption(OptionBuilder.create("sndpdulen"));
-//
-//        OptionBuilder.withArgName("KB");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("set SO_RCVBUF socket option to specified value in KB");
-//        opts.addOption(OptionBuilder.create("sorcvbuf"));
-//
-//        OptionBuilder.withArgName("KB");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("set SO_SNDBUF socket option to specified value in KB");
-//        opts.addOption(OptionBuilder.create("sosndbuf"));
-//
-//        OptionBuilder.withArgName("[seq/]attr=value");
-//        OptionBuilder.hasArgs();
-//        OptionBuilder.withValueSeparator('=');
-//        OptionBuilder.withDescription("specify matching key. attr can be " +
-//                "specified by name or tag value (in hex), e.g. PatientName " +
-//                "or 00100010. Attributes in nested Datasets can " +
-//                "be specified by preceding the name/tag value of " +
-//                "the sequence attribute, e.g. 00400100/00400009 " +
-//                "for Scheduled Procedure Step ID in the Scheduled " +
-//                "Procedure Step Sequence.");
-//        opts.addOption(OptionBuilder.create("q"));
-//
-//        OptionBuilder.withArgName("date");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("specify matching SPS start date " +
-//                "(range). Shortcut for -q00400100/00400002=<date>.");
-//        opts.addOption(OptionBuilder.create("date"));
-//
-//        OptionBuilder.withArgName("time");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("specify matching SPS start time " +
-//                "(range). Shortcut for -q00400100/00400003=<time>.");
-//        opts.addOption(OptionBuilder.create("time"));
-//
-//        OptionBuilder.withArgName("modality");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("specify matching Modality. Shortcut " +
-//                "for -q00400100/00080060=<modality>.");
-//        opts.addOption(OptionBuilder.create("mod"));
-//
-//        OptionBuilder.withArgName("aet");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("specify matching Scheduled Station AE " +
-//                "title. Shortcut for -q00400100/00400001=<aet>.");
-//        opts.addOption(OptionBuilder.create("aet"));
-//
-//        OptionBuilder.withArgName("attr");
-//        OptionBuilder.hasArgs();
-//        OptionBuilder.withDescription("specify additional return key. attr can " +
-//                "be specified by name or tag value (in hex).");
-//        opts.addOption(OptionBuilder.create("r"));
-//
-//        OptionBuilder.withArgName("num");
-//        OptionBuilder.hasArg();
-//        OptionBuilder.withDescription("cancel query after receive of specified " +
-//                "number of responses, no cancel by default");
-//        opts.addOption(OptionBuilder.create("C"));
-//
-//
-//        opts.addOption("lowprior", false,
-//                "LOW priority of the C-FIND operation, MEDIUM by default");
-//        opts.addOption("highprior", false,
-//                "HIGH priority of the C-FIND operation, MEDIUM by default");
-//        opts.addOption("h", "help", false, "print this message");
-//        opts.addOption("V", "version", false,
-//                "print the version information and exit");
-//        CommandLine cl = null;
-//        try {
-//            cl = new GnuParser().parse(opts, args);
-//        } catch (ParseException e) {
-//            exit("dcmmwl: " + e.getMessage());
-//            throw new RuntimeException("unreachable");
-//        }
-//        if (cl.hasOption('V')) {
-//            Package p = DcmMWLServiceImpl.class.getPackage();
-//            System.out.println("dcmqr v" + p.getImplementationVersion());
-//            System.exit(0);
-//        }
-//        if (cl.hasOption('h') || cl.getArgList().size() != 1) {
-//            HelpFormatter formatter = new HelpFormatter();
-//            formatter.printHelp(USAGE, DESCRIPTION, opts, EXAMPLE);
-//            System.exit(0);
-//        }
-//
-//        return cl;
-//    }
+
 
     private static int toPort(String port) {
         return port != null ? parseInt(port, "illegal port number", 1, 0xffff)

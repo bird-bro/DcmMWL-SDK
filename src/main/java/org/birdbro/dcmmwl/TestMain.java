@@ -32,17 +32,17 @@ public class TestMain {
         dcmMWLDto.setRemoteCalled("DEMO");
         dcmMWLDto.setRemoteAEHost("127.0.0.1");
         dcmMWLDto.setRemoteAEPort(3000);
+        //默认ISO_IR_100
+        dcmMWLDto.setCharSet("ISO_IR_100");
 
         dcmMWLDto.setLocalCalling("test");
         dcmMWLDto.setLocalAEHost("127.0.0.1");
         dcmMWLDto.setMod("CT");
         //dcmMWLDto.setDate("19951015");
 
-
         //自定义查询入参，根据业务需求构造查询入参数组 {dicomTag-1，参数-1，dicomTag-2，参数-2，dicomTag-N，参数-N}
         String[] matching ={DicomTagEnum.AccessionNumber.getTag(),"00009"} ;
         dcmMWLDto.setMatchingKeys(matching);
-
 
         try {
             //原始dicom标签数据返回

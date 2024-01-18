@@ -24,6 +24,11 @@ public class DicomTagUtil {
                 WorkListDto workListDto = new WorkListDto();
                 for (String str : strArray) {
                     String regexStr = regexStr(str);
+                    if (str.contains("0008,0005)")) {
+                        workListDto.setCharSet(regexStr);
+                        continue;
+                    }
+
                     if (str.contains("0008,0050)")) {
                         workListDto.setAccessionNumber(regexStr);
                         continue;

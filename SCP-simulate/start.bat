@@ -1,1 +1,0 @@
-.\bin\wlmscpfs.exe -dfp .\\wlist 3000
