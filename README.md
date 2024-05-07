@@ -1,3 +1,4 @@
+https://xie.infoq.cn/article/fa2d88404380385c4814d62bf
 1、SCP服务
    启动仪器设备或RIS/PACS系统的SCP服务，若开发环境中没有可使用SDK提供的SCP模拟器。
 模拟器启动方法：
